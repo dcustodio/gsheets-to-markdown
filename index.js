@@ -24,7 +24,8 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
     }
     // Authorize a client with the loaded credentials, then call the
     // Google Sheets API.
-    authorize(JSON.parse(content), listMajors);
+    authorize(JSON.parse(content), listGameWeek);
+
 });
 
 /**
@@ -102,15 +103,15 @@ function storeToken(token) {
 }
 
 /**
- * Print the names and majors of students in a sample spreadsheet:
- * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+ * List GameWeek results
+ * @param {*} auth
  */
-function listMajors(auth) {
+function listGameWeek(auth) {
     var sheets = google.sheets('v4');
     sheets.spreadsheets.values.get({
         auth: auth,
         spreadsheetId: config.spreadsheetId,
-        range: 'Raw Results!A2:E',
+        range: 'Raw Results!A2:T',
     }, function (err, response) {
         if (err) {
             console.log('The API returned an error: ' + err);
@@ -120,12 +121,157 @@ function listMajors(auth) {
         if (rows.length == 0) {
             console.log('No data found.');
         } else {
-            console.log('Name, Major:');
+
+            let mvp = [];
+
+            console.log('|Player|Team|Time played|Result |Points |Notes|');
+            console.log('|---|---|---|---|---|---|');
+
             for (var i = 0; i < rows.length; i++) {
+
                 var row = rows[i];
-                // Print columns A and E, which correspond to indices 0 and 4.
-                   console.log('%s, %s', row[0], row[1]);
+                const _gw = row[18];
+
+                if (gameWeek && gameWeek != _gw) {
+                    continue;
+                }
+
+                const gwMVP = parseInt(row[19]);
+                const playerName = row[0];
+                const team = row[1];
+                const gameResult = row[6];
+                const GWPoints = gwMVP == 1 ? `**${row[16]}**` : row[16];
+                const goals = parseInt(row[5]);
+                const assists = parseInt(row[10]);
+                const yellowCards = parseInt(row[13]);
+                const redCard = parseInt(row[14]);
+                const notes = row[17];
+
+                let time = row[4];
+
+                if (parseInt(time) == 0 && notes.startsWith('NC')) {
+                    time = '-';
+                }
+
+                let computedNotes = '';
+
+                if (goals > 0) {
+                    computedNotes = `${goals} Goal${ goals > 1 ? 's' : '' }`;
+                }
+
+                if (assists > 0) {
+
+                    if (computedNotes) {
+                        computedNotes += ', ';
+                    }
+
+                    computedNotes += `${assists} Assist${ goals > 1 ? 's' : '' }`;
+                }
+
+                if (yellowCards > 0) {
+
+                    if (computedNotes) {
+                        computedNotes += ', ';
+                    }
+
+                    computedNotes += `${yellowCards} YC${ yellowCards > 1 ? 's' : '' }`;
+                }
+
+                if (redCard > 0) {
+
+                    if (computedNotes) {
+                        computedNotes += ', ';
+                    }
+
+                    computedNotes += `${redCard} RC`;
+                }
+
+                if (!notes.startsWith('NA') && !notes.startsWith('NC')) {
+
+                    if (computedNotes == '') {
+                        computedNotes = 'link';
+                    }
+
+                    computedNotes = `[${computedNotes}](${notes})`
+
+                } else {
+                    computedNotes = notes;
+                }
+
+                if (gwMVP == 1) {
+                    mvp.push(playerName);
+                }
+
+                console.log('| %s | %s | %s | %s |%s | %s |', playerName, team, time, gameResult, GWPoints, computedNotes);
             }
+
+            console.log(`#MVP\n${mvp.join(', ')}`);
+        }
+
+        getStandings(auth)
+    });
+}
+
+/**
+ *
+ * @param {*} auth
+ */
+function getStandings(auth) {
+    var sheets = google.sheets('v4');
+    sheets.spreadsheets.values.get({
+        auth: auth,
+        spreadsheetId: config.spreadsheetId,
+        range: 'Resumo!A2:T25',
+    }, function (err, response) {
+        if (err) {
+            console.log('The API returned an error: ' + err);
+            return;
+        }
+        var rows = response.values;
+        if (rows.length == 0) {
+            console.log('No data found.');
+        } else {
+
+            let data = [];
+
+            console.info(`${rows.length} players`);
+
+            let avg = { player: '', points: 0};
+            let tot = { player: '', points: 0};
+
+            for (var i = 0; i < rows.length; i++) {
+
+                var row = rows[i];
+                var dataRow = {};
+                var totalPoints = isNaN(parseInt(row[14])) ? 0 : parseInt(row[14]);
+                var AVGPoints =  isNaN(parseFloat(row[15])) ? 0 : parseFloat(row[15]);
+                //console.log(`TOTAL: ${dataRow.totalPoints} AVG ${dataRow.AVGPoints}`);
+
+                if(AVGPoints > avg.points) {
+                    avg.player = row[0];
+                    avg.points = AVGPoints;
+                }
+
+                if(totalPoints > tot.points) {
+                    tot.player = row[0];
+                    tot.points = totalPoints;
+                }
+            }
+
+            console.log('|Player|Total Points|');
+            console.log('|---|---|');
+            console.log(toMKD(tot));
+            console.log('\n');
+            console.log('|Player|AVG PPG|');//15
+            console.log('|---|---|');
+            console.log(toMKD(avg));
+            console.log('\n');
         }
     });
+}
+
+
+
+function toMKD(o) {
+    return `|${o.player}|${o.points}|`;
 }
