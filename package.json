@@ -1,0 +1,15 @@
+{
+  "name": "google-sheets-to-markdown",
+  "version": "1.0.0",
+  "description": "reads data from a google sheet document and converts it to a markdown file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Custódio",
+  "license": "MIT",
+  "dependencies": {
+    "google-auth-library": "^0.11.0",
+    "googleapis": "^22.2.0"
+  }
+}
