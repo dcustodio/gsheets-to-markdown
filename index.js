@@ -8,6 +8,8 @@ const gameWeek = process.argv[2];
 
 console.log(`GAME WEEK: `, gameWeek)
 
+let markdownText = "";
+
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/sheets.googleapis.com-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
@@ -127,6 +129,9 @@ function listGameWeek(auth) {
             console.log('|Player|Team|Time played|Result |Points |Notes|');
             console.log('|---|---|---|---|---|---|');
 
+            markdownText += '|Player|Team|Time played|Result |Points |Notes|\n';
+            markdownText += '|---|---|---|---|---|---|\n';
+
             for (var i = 0; i < rows.length; i++) {
 
                 var row = rows[i];
@@ -202,10 +207,12 @@ function listGameWeek(auth) {
                     mvp.push(playerName);
                 }
 
-                console.log('| %s | %s | %s | %s |%s | %s |', playerName, team, time, gameResult, GWPoints, computedNotes);
+                markdownText += `| ${playerName} | ${team} | ${time} | ${gameResult} | ${GWPoints} | ${computedNotes} |\n`;
             }
-
-            console.log(`#MVP\n${mvp.join(', ')}`);
+            markdownText += '\n_NA: Not Available;NC: Not in squad;YC: Yellow Card,RC: Red Card_\n\n&nbsp;\n\n';
+            markdownText += '\n\n#Fantasy League\n\n&nbsp;\n\n';
+            markdownText += `##MVP\n${mvp.join(', ')}\n`;
+      
         }
 
         getStandings(auth)
@@ -236,8 +243,8 @@ function getStandings(auth) {
 
             console.info(`${rows.length} players`);
 
-            let avg = { player: '', points: 0};
-            let tot = { player: '', points: 0};
+            let avg = [];
+            let tot = [];
 
             for (var i = 0; i < rows.length; i++) {
 
@@ -245,33 +252,57 @@ function getStandings(auth) {
                 var dataRow = {};
                 var totalPoints = isNaN(parseInt(row[14])) ? 0 : parseInt(row[14]);
                 var AVGPoints =  isNaN(parseFloat(row[15])) ? 0 : parseFloat(row[15]);
-                //console.log(`TOTAL: ${dataRow.totalPoints} AVG ${dataRow.AVGPoints}`);
 
-                if(AVGPoints > avg.points) {
-                    avg.player = row[0];
-                    avg.points = AVGPoints;
-                }
+                avg.push({ player: row[0], points: AVGPoints});
+                tot.push({ player: row[0], points: totalPoints});
 
-                if(totalPoints > tot.points) {
-                    tot.player = row[0];
-                    tot.points = totalPoints;
-                }
             }
 
-            console.log('|Player|Total Points|');
-            console.log('|---|---|');
-            console.log(toMKD(tot));
-            console.log('\n');
-            console.log('|Player|AVG PPG|');//15
-            console.log('|---|---|');
-            console.log(toMKD(avg));
-            console.log('\n');
+            avg.sort(sortPlayers);
+            tot.sort(sortPlayers);
+
+            markdownText += '\n\n##Rankings\n&nbsp;\n\n';
+            markdownText += '|Player|Total Points|\n';
+            markdownText += '|---|---|\n';
+
+            tot.splice(0,5).forEach(function(element) {
+
+                markdownText += toMKD(element);
+            });
+
+
+            markdownText += '\n\n&nbsp;\n\n';
+            markdownText += '|Player|AVG PPG|\n';
+            markdownText += '|---|---|\n';
+           
+            avg.splice(0,5).forEach(function(element) {
+
+                markdownText += toMKD(element);
+            });
+
         }
+
+        
+        writeMarkdownFile(markdownText)
     });
 }
 
 
 
 function toMKD(o) {
-    return `|${o.player}|${o.points}|`;
+    return `|${o.player}|${o.points}|\n`;
 }
+
+function sortPlayers(pa, pb) {
+    return pb.points - pa.points;
+}
+
+function writeMarkdownFile(content) {
+
+    console.log(content);
+
+    fs.writeFile(`GameWeek${gameWeek || ''}.md`, content, (err) => {
+        if (err) throw err;
+        console.log('The file has been saved!');
+    });  
+} 
