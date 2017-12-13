@@ -191,7 +191,7 @@ function listGameWeek(auth) {
                     computedNotes += `${redCard} RC`;
                 }
 
-                if (!notes.startsWith('NA') && !notes.startsWith('NC')) {
+                if (!notes.startsWith('NA') && !notes.startsWith('NC') ) {
 
                     if (computedNotes == '') {
                         computedNotes = 'link';
@@ -199,7 +199,7 @@ function listGameWeek(auth) {
 
                     computedNotes = `[${computedNotes}](${notes})`
 
-                } else {
+                } else if (computedNotes == '') {
                     computedNotes = notes;
                 }
 
@@ -212,7 +212,7 @@ function listGameWeek(auth) {
             markdownText += '\n_NA: Not Available;NC: Not in squad;YC: Yellow Card,RC: Red Card_\n\n&nbsp;\n\n';
             markdownText += '\n\n#Fantasy League\n\n&nbsp;\n\n';
             markdownText += `##MVP\n${mvp.join(', ')}\n`;
-      
+
         }
 
         getStandings(auth)
@@ -274,7 +274,7 @@ function getStandings(auth) {
             markdownText += '\n\n&nbsp;\n\n';
             markdownText += '|Player|AVG PPG|\n';
             markdownText += '|---|---|\n';
-           
+
             avg.splice(0,5).forEach(function(element) {
 
                 markdownText += toMKD(element);
@@ -282,7 +282,7 @@ function getStandings(auth) {
 
         }
 
-        
+
         writeMarkdownFile(markdownText)
     });
 }
@@ -304,5 +304,5 @@ function writeMarkdownFile(content) {
     fs.writeFile(`GameWeek${gameWeek || ''}.md`, content, (err) => {
         if (err) throw err;
         console.log('The file has been saved!');
-    });  
-} 
+    });
+}
