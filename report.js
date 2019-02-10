@@ -29,9 +29,6 @@ function listGameWeek (auth) {
         } else {
             let mvp = []
 
-            debug('|Player|Team|Time played|Result |Points |Notes|')
-            debug('|---|---|---|---|---|---|')
-
             markdownText += '|Player|Team|Time played|Result |Points |Notes|\n'
             markdownText += '|---|---|---|---|---|---|\n'
 
@@ -123,7 +120,7 @@ function getStandings (auth) {
     sheets.spreadsheets.values.get({
         auth: auth,
         spreadsheetId: config.spreadsheetId,
-        range: 'Resumo!A2:T25'
+        range: 'Resumo!A2:T20'
     }, function (err, response) {
         if (err) {
             debug('The API returned an error: ' + err)
@@ -133,8 +130,6 @@ function getStandings (auth) {
         if (rows.length === 0) {
             debug('No data found.')
         } else {
-            console.info(`${rows.length} players`)
-
             let avg = []
             let tot = []
 
