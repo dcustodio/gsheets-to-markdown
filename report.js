@@ -23,7 +23,6 @@ function listGameWeek (auth) {
             debug('The API returned an error: ' + err)
             return
         }
-
         var rows = response.data.values
         if (rows.length === 0) {
             debug('No data found.')
@@ -47,10 +46,10 @@ function listGameWeek (auth) {
                 const gwMVP = parseInt(row[19])
                 const playerName = row[0]
                 const team = row[1]
-                const gameResult = row[6]
+                const gameResult = row[7]
                 const GWPoints = gwMVP === 1 ? `**${row[16]}**` : row[16]
                 const goals = parseInt(row[5])
-                const assists = parseInt(row[10])
+                const assists = parseInt(row[6])
                 const yellowCards = parseInt(row[13])
                 const redCard = parseInt(row[14])
                 const notes = row[17]
@@ -91,11 +90,10 @@ function listGameWeek (auth) {
                     computedNotes += `${redCard} RC`
                 }
 
-                if (!notes.startsWith('NA') && !notes.startsWith('NC')) {
+                if (!notes.startsWith('NA') && !notes.startsWith('NC') && notes.startsWith('http')) {
                     if (computedNotes === '') {
                         computedNotes = 'link'
                     }
-
                     computedNotes = `[${computedNotes}](${notes})`
                 } else if (computedNotes === '') {
                     computedNotes = notes
