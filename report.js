@@ -135,8 +135,8 @@ function getStandings (auth) {
 
             for (var i = 0; i < rows.length; i++) {
                 var row = rows[i]
-                var totalPoints = isNaN(parseInt(row[14])) ? 0 : parseInt(row[14])
-                var AVGPoints = isNaN(parseFloat(row[15])) ? 0 : parseFloat(row[15])
+                var totalPoints = isNaN(parseInt(row[15])) ? 0 : parseInt(row[15])
+                var AVGPoints = isNaN(parseFloat(row[16])) ? 0 : parseFloat(row[16])
 
                 avg.push({ player: row[0], points: AVGPoints })
                 tot.push({ player: row[0], points: totalPoints })

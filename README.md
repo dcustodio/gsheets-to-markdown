@@ -9,3 +9,7 @@ or pass gameweek parameter
 
 ````node index.js 9````
 
+## Configuration
+
+Add the correct spreadsheetId in `config.js`.
+
