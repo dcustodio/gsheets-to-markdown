@@ -7,7 +7,7 @@ to run:
 
 or pass gameweek parameter  
 
-````node index.js 9````
+````npm start -- 14````
 
 ## Configuration
 
