@@ -11,8 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^4.1.1",
-    "google-auth-library": "^5.9.0",
-    "googleapis": "^47.0.0",
+    "google-auth-library": "^9.1.0",
+    "googleapis": "^127.0.0",
     "supports-color": "^7.1.0"
   },
   "devDependencies": {
