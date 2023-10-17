@@ -10,7 +10,7 @@
   "author": "David Custódio",
   "license": "MIT",
   "dependencies": {
-    "debug": "^4.1.1",
+    "debug": "^4.3.1",
     "google-auth-library": "^5.9.0",
     "googleapis": "^47.0.0",
     "supports-color": "^7.1.0"
